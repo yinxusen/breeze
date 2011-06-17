@@ -2,7 +2,7 @@ import sbt._
 import java.util.jar.Attributes.Name._
 
 
-class Project(info: ProjectInfo) extends DefaultProject(info) {
+class Project(info: ProjectInfo) extends DefaultProject(info) with AkkaProject {
   // 
   // repositories
   //
@@ -11,6 +11,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val OndexRepo = "ondex" at "http://ondex.rothamsted.bbsrc.ac.uk/nexus/content/groups/public"
   val scalaToolsSnapshots = "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots/"
   val ivyLocal = "ivy local" at "file://" + Path.userHome +".ivy/local/"
+  val akka = "akka" at "http://akka.io/repository/"
   override def ivyRepositories = Resolver.withDefaultResolvers(repositories.toSeq, false)
 
   //
@@ -20,6 +21,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   lazy val data = project("data","data", new Data(_));
   lazy val learn = project("learn","learn",new Learn(_), data);
   lazy val graphs = project("graphs","graphs",new Graphs(_), data);
+  lazy val smr = project("smr","smr",new SMR(_), data, graphs);
 
   class Data(info: ProjectInfo) extends DefaultProject(info) {
     val forkjoin = "org.coconut.forkjoin" % "jsr166y" % "070108"
@@ -74,6 +76,28 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
     val XMLGraphicsCommons = "org.apache.xmlgraphics" % "xmlgraphics-commons" % "1.3.1"
     val IText = "com.lowagie" % "itext" % "2.1.5" intransitive()
     val ScalaCheck = "org.scala-tools.testing" %% "scalacheck" % "1.8" % "test"
+
+    val ScalaTest = buildScalaVersion match {
+      case "2.9.0"     => "org.scalatest" % "scalatest" % "1.4.RC2" % "test"
+      case "2.8.1"     => "org.scalatest" % "scalatest" % "1.3" % "test"
+      case x           => error("Unsupported Scala version " + x)
+    }
+    val JUnit = "junit" % "junit" % "4.5" % "test"
+  }
+
+  class SMR(info: ProjectInfo) extends DefaultProject(info) with AkkaProject {
+    val forkjoin = "org.coconut.forkjoin" % "jsr166y" % "070108"
+    val paranamer = "com.thoughtworks.paranamer" % "paranamer" % "2.2"
+    val JLine = "jline" % "jline" % "0.9.94"
+    val Scalala = "org.scalala" %% "scalala" % "1.0.0.RC2-SNAPSHOT";
+    val NetlibJava = "netlib" % "netlib-java" % "0.9.2"
+    val ArpackCombo = "netlib" % "arpack-combo" % "0.1"
+    val JCommon = "jfree" % "jcommon" % "1.0.16"
+    val JFreeChart = "jfree" % "jfreechart" % "1.0.13"
+    val XMLGraphicsCommons = "org.apache.xmlgraphics" % "xmlgraphics-commons" % "1.3.1"
+    val IText = "com.lowagie" % "itext" % "2.1.5" intransitive()
+    val ScalaCheck = "org.scala-tools.testing" %% "scalacheck" % "1.8" % "test"
+    val akkaRemote = akkaModule("remote")
 
     val ScalaTest = buildScalaVersion match {
       case "2.9.0"     => "org.scalatest" % "scalatest" % "1.4.RC2" % "test"
