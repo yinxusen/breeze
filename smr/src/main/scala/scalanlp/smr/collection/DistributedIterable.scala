@@ -139,7 +139,7 @@ trait DistributedIterableLike[+T,+Repr<:DistributedIterable[T],+Local<:Iterable[
   def count(p: (T) => Boolean) = aggregate(0)({(x:Int,t: T) => if (p(t)) x+1 else x}, _ + _);
 
   def hasDefiniteSize: Boolean = true;
-  def nonEmpty: Boolean = TODO;
+  def nonEmpty: Boolean = exists(_ => true);
 //  def isEmpty = !nonEmpty;
 
   def size = aggregate(0)((x:Int, t: T)=>(x+1), _ + _);
@@ -263,5 +263,7 @@ private[smr] class SimpleDistributedIterable[+T:DataSerialization.ReadWritable](
   protected[this] val distributedBuilderFactory:CanBuildDistributedFrom[DistributedIterable[T],T,DistributedIterable[T]] = DistributedIterable.builder[T,T]
   protected[this] def localBuilder = Iterable.canBuildFrom[T].apply();
   protected[this] val readableT: DataSerialization.ReadWritable[T] = implicitly[DataSerialization.ReadWritable[T]];
+
+  override val size = sizes.foldLeft(0)(_ + _);
 
 }
