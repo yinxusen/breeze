@@ -24,6 +24,7 @@ trait DistributedIterableLike[+T,+Repr<:DistributedIterable[T],+Local<:Iterable[
   val distributor: Distributor with Storage;
   protected[this] val distributedBuilderFactory:CanBuildDistributedFrom[Repr,T,Repr];
   protected[this] def localBuilder:Builder[T,Local]
+  def named(name: String):DistributedIterable[T]
 
 
   def repr: Repr = this.asInstanceOf[Repr]
@@ -263,6 +264,12 @@ private[smr] class SimpleDistributedIterable[+T:DataSerialization.ReadWritable](
   protected[this] val distributedBuilderFactory:CanBuildDistributedFrom[DistributedIterable[T],T,DistributedIterable[T]] = DistributedIterable.builder[T,T]
   protected[this] def localBuilder = Iterable.canBuildFrom[T].apply();
   protected[this] val readableT: DataSerialization.ReadWritable[T] = implicitly[DataSerialization.ReadWritable[T]];
+
+
+  def named(name: String) = {
+    val newShards = distributor.name(shards,name)
+    new SimpleDistributedIterable[T](newShards,sizes,distributor)
+  }
 
   override val size = sizes.foldLeft(0)(_ + _);
 

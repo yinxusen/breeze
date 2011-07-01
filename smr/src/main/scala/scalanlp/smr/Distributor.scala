@@ -20,7 +20,7 @@ trait Distributor extends DistributorLike[Distributor] with Storage {
 
   def doTasks[T:DataSerialization.Readable,ToStore:DataSerialization.Writable,ToReturn](shards: IndexedSeq[URI], task: =>Task[T,ToStore,ToReturn]):IndexedSeq[(IndexedSeq[URI],ToReturn)] = {
     {
-      for(s <- shards.par) yield localize[T,(IndexedSeq[URI],ToReturn)](s) { (context,t:T) =>
+      for(s <- shards.par) yield doWithShard[T,(IndexedSeq[URI],ToReturn)](s) { (context,t:T) =>
         val (tostore, toreturn) = task(t);
         val uris = tostore.map(context.store(_)).toIndexedSeq;
         (uris,toreturn);
@@ -28,7 +28,7 @@ trait Distributor extends DistributorLike[Distributor] with Storage {
     }.map(_.apply()).toIndexedSeq;
   }
 
-  protected def localize[T:DataSerialization.Readable,A](shard: URI)(f: (Storage,T)=>A):Future[A];
+  protected def doWithShard[T:DataSerialization.Readable,A](shard: URI)(f: (Storage,T)=>A):Future[A];
 
 }
 

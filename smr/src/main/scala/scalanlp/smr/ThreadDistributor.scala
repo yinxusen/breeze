@@ -14,7 +14,7 @@ import actors.Futures
  * @author dlwh
  */
 abstract class ThreadDistributor extends Distributor with DistributorLike[ThreadDistributor] with Storage {
-  protected def localize[T:DataSerialization.Readable, A](shard: URI)(f: (Storage, T) => A) = {
+  protected def doWithShard[T:DataSerialization.Readable, A](shard: URI)(f: (Storage, T) => A) = {
     Futures.future(f(this,load[T](shard).get));
   }
 }
