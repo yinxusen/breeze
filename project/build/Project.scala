@@ -10,6 +10,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) with AkkaProject {
   val ScalaNLPRepo = "ScalaNLP Maven2" at "http://repo.scalanlp.org/repo"
   val OndexRepo = "ondex" at "http://ondex.rothamsted.bbsrc.ac.uk/nexus/content/groups/public"
   val scalaToolsSnapshots = "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots/"
+  val scalaTools = "Scala Tools " at "http://scala-tools.org/repo-releases/"
   val ivyLocal = "ivy local" at "file://" + Path.userHome +".ivy/local/"
   val akka = "akka" at "http://akka.io/repository/"
   override def ivyRepositories = Resolver.withDefaultResolvers(repositories.toSeq, false)
