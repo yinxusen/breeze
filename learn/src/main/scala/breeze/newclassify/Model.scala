@@ -23,12 +23,13 @@ case class ModelSpec[Y, D, R](y: D=>Y, response: Response[Y, _, R], predictors: 
     }
     val obj = new Model.Objective(this, factories, offsets, examples)
     val finalWeights = new LBFGS[DenseVector[Double]].minimize(new CachedBatchDiffFunction(obj), DenseVector.vertcat(weights:_*))
+//    GradientTester.test[Int, DenseVector[Double]](obj, finalWeights, randFraction = 1.0, tolerance = 1E-9)
     val actualPredictors = obj.partitionWeights(finalWeights).zip(factories) map { case (w,f) => f.predictor(w)}
 
     new Model[D, R] {
       def predict(d: D): R = {
         val scores: immutable.IndexedSeq[R] = actualPredictors.map(_.predict(d))
-        response.sum(scores)
+        response.response(response.sum(scores))
       }
     }
   }
